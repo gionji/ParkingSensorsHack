@@ -5,12 +5,13 @@ unsigned long pulse_length = 0;
 byte sensorValue[16];
 byte pulse_value;
 
-byte distLL= 0;
-byte distL = 0;
-byte distR = 0;
-byte distRR= 0;
+#define RIGHT_EXTERNAL 1
+#define RIGHT_INTERNAL 2
+#define LEFT_INTERNAL 3
+#define LEFT_EXTERNAL 0
 
 int values[4];
+int distance[4];
 
 
 int initialPulseDuration  = 900 ;// microseconds
@@ -42,62 +43,52 @@ void loop() {
   }
 /////////////////////////////////////////////////////////////
 
+
+/* get sensor number fro bites 8 and 9
+9<<0
+8<<1
+0 = a
+1 = d
+2 = c
+3 = b
+
+*/
+
 short sensorId = 0;
-sensorId |= sensorValue[9];
-sensorId |= sensorValue[8] << 1;
+sensorId |= sensorValue[9] << 1;
+sensorId |= sensorValue[8] << 0;
 
 
-short cane = 0;
 int count = 13;
 
-for(i=0; i<8; i++){
-  cane |= sensorValue[i] << count;
-  count--;
-  }
-for(i=10; i<16; i++){
-  cane |= sensorValue[i] << count;
-  count--;
-  }
-
-short gatto = 0;
-count = 13;
+short data = 0;
+count = 0;
 
 for(i=10; i<16; i++){
-  gatto |= sensorValue[i] << count;
-  count--;
-  }
+  data |= sensorValue[i] << count;
+  count++;
+  }  
 for(i=0; i<8; i++){
-  gatto |= sensorValue[i] << count;
-  count--;
+  data |= sensorValue[i] << count;
+  count++;
   }
 
+values[ sensorId ] = data;
 
-values[ sensorId ] = cane;
+for(i = 0; i<4; i++){
+  distance[i] = map(values[ i ], 16361, 13280, 0, 300);
+}
 
-Serial.println(values[2], BIN);
 
-/*
-for(i=0; i<4; i++){
-  Serial.print( values[i], BIN);
-  Serial.print( " ");
-  }
-Serial.println("");
-*/
+Serial.println("  ");
 
-///////////////////////////////////////////////////////////
-/* 
-  for (i = 8; i < 16; i++) {
-    if(i % 4 == 0)
-      Serial.print(" ");
-    Serial.print(sensorValue[i], BIN);
-  }
+for(i = 0; i<4; i++){
+  Serial.print(i);
+  Serial.print("  ");
+  Serial.print( values[ i ]);
+  Serial.print("  ");
+  Serial.println( distance[ i ]);
+}
 
-  for (i = 0; i < 8; i++) {
-    if(i % 4 == 0)
-      Serial.print(" ");
-    Serial.print(sensorValue[i], BIN);
-  }
-  
-  Serial.println(" ");
-*/
+
 }
