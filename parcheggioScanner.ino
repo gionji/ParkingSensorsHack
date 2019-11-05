@@ -5,9 +5,9 @@
 
 #define MAX_DIST 300
 #define MAX_VALUE 13283
-#define MIN_DIST 10
+#define MIN_DIST 0
 #define MIN_VALUE 16361
-
+ 
 
 // Device address
 #define I2C_ADDR             0x70
@@ -53,6 +53,11 @@ int initialPulseTolerance = 100 ;// microseconde
 void setup() {
   pinMode(pin, INPUT);
   pinMode(ledPin, OUTPUT);
+
+  // I2c slave mode enabling
+  Wire.begin(I2C_ADDR);
+  Wire.onRequest(requestEvent); // data request to slave
+  Wire.onReceive(receiveEvent); // data slave received
 
   #ifdef SERIAL_OUTPUT
     Serial.begin(115200);
