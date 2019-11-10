@@ -76,10 +76,10 @@ void loop() {
   while ( pulse_length < 400 ) {
     pulse_length = pulseIn(pin, LOW);
     if (pulse_length < 200) {
-      pulse_value = B0;
+      pulse_value = B1;
     }
     else {
-      pulse_value = B1;
+      pulse_value = B0;
     }
     sensorValue[bitCount] = pulse_value;
     bitCount++;
@@ -97,17 +97,21 @@ void loop() {
   Serial.print( "\n" );
 
 
-
-  /*
-  for(i = 0; i<4; i++){
-    distance[i] = map(values[ i ], MIN_VALUE, MAX_VALUE, MIN_DIST, MAX_DIST);
-  }
-  // Output variables
-  VALUE_RIGHT_EXTERNAL = distance[RIGHT_EXTERNAL] > 255 ? (OUT_TYPE) 255 : (OUT_TYPE) distance[RIGHT_EXTERNAL];
-  VALUE_RIGHT_INTERNAL = distance[RIGHT_INTERNAL] > 255 ? (OUT_TYPE) 255 : (OUT_TYPE) distance[RIGHT_INTERNAL];
-  VALUE_LEFT_EXTERNAL  = distance[LEFT_EXTERNAL] > 255 ? (OUT_TYPE) 255 : (OUT_TYPE) distance[LEFT_EXTERNAL];
-  VALUE_LEFT_INTERNAL  = distance[LEFT_INTERNAL] > 255 ? (OUT_TYPE) 255 : (OUT_TYPE) distance[LEFT_INTERNAL];
-  */
+  for(i=0, j=8; i<8, j<8; i++, j++){
+    VALUE_RIGHT_EXTERNAL |= sensorValue[i] << j;
+    }  
+  
+  for(i=8, j=8; i<16, j<8; i++, j++){
+    VALUE_RIGHT_INTERNAL |= sensorValue[i] << j;
+    }  
+  
+  for(i=16, j=8; i<24, j<8; i++, j++){
+    VALUE_LEFT_EXTERNAL |= sensorValue[i] << j;
+    }  
+  
+  for(i=24, j=8; i<32, j<8; i++, j++){
+    VALUE_LEFT_INTERNAL |= sensorValue[i] << j;
+    }  
 /*
 #ifdef SERIAL_OUTPUT
   StaticJsonBuffer<200> jsonBuffer;
@@ -120,9 +124,7 @@ void loop() {
 
   root.prettyPrintTo(Serial);
 #endif
-
 */
-
 }
 
 
@@ -139,6 +141,7 @@ void receiveEvent(int countToRead) {
 
   EVENT = x;
 }
+
 
 void requestEvent() {
   String event_s = "0xFF";
