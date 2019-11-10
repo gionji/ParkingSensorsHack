@@ -34,7 +34,7 @@ OUT_TYPE VALUE_LEFT_INTERNAL  = 0;
 
 uint8_t EVENT = 0;
 
-int pin    = 7;
+int parkPin    = 7;
 int ledPin = 13;
 unsigned long pulse_length = 0;
 
@@ -48,7 +48,7 @@ int distance[4];
 #include <ArduinoJson.h>
 
 void setup() {
-  pinMode(pin, INPUT);
+  pinMode(parkPin, INPUT);
   pinMode(ledPin, OUTPUT);
 
   // I2c slave mode enabling
@@ -64,17 +64,16 @@ void setup() {
 
 void loop() {
 
-  // Aspetto il segnale di inizio che e' lungo 900 uS
+  // bmw
   while (pulse_length < 2500 || pulse_length > 3500) {
-    pulse_length = pulseIn(pin, HIGH);
+    pulse_length = pulseIn(parkPin, HIGH);
   }
 
-  int i, j;
   int bitCount = 0;
   
-  pulse_length = pulseIn(pin, LOW);
+  pulse_length = pulseIn(parkPin, LOW);
   while ( pulse_length < 400 ) {
-    pulse_length = pulseIn(pin, LOW);
+    pulse_length = pulseIn(parkPin, LOW);
     if (pulse_length < 200) {
       pulse_value = B1;
     }
@@ -86,6 +85,24 @@ void loop() {
   }
 
 
+  int i, j;
+  for(i=0, j=0; i<8, j<8; i++, j++){
+    VALUE_RIGHT_EXTERNAL |= sensorValue[i] << j;
+    }  
+  
+  for(i=8, j=0; i<16, j<8; i++, j++){
+    VALUE_RIGHT_INTERNAL |= sensorValue[i] << j;
+    }  
+  
+  for(i=16, j=0; i<24, j<8; i++, j++){
+    VALUE_LEFT_INTERNAL |= sensorValue[i] << j;
+    }  
+  
+  for(i=24, j=0; i<32, j<8; i++, j++){
+    VALUE_LEFT_EXTERNAL |= sensorValue[i] << j;
+    }  
+
+/*
   Serial.print(bitCount);
   Serial.print( "   " );
 
@@ -95,36 +112,21 @@ void loop() {
   }
     
   Serial.print( "\n" );
+*/
 
 
-  for(i=0, j=8; i<8, j<8; i++, j++){
-    VALUE_RIGHT_EXTERNAL |= sensorValue[i] << j;
-    }  
-  
-  for(i=8, j=8; i<16, j<8; i++, j++){
-    VALUE_RIGHT_INTERNAL |= sensorValue[i] << j;
-    }  
-  
-  for(i=16, j=8; i<24, j<8; i++, j++){
-    VALUE_LEFT_EXTERNAL |= sensorValue[i] << j;
-    }  
-  
-  for(i=24, j=8; i<32, j<8; i++, j++){
-    VALUE_LEFT_INTERNAL |= sensorValue[i] << j;
-    }  
-/*
 #ifdef SERIAL_OUTPUT
   StaticJsonBuffer<200> jsonBuffer;
   JsonObject& root = jsonBuffer.createObject();
 
   root["right-ext"] = VALUE_RIGHT_EXTERNAL;
   root["right-int"] = VALUE_RIGHT_INTERNAL;
-  root["left-ext"] = VALUE_LEFT_EXTERNAL;
-  root["left-int"] = VALUE_LEFT_INTERNAL;
+  root["left-ext"]  = VALUE_LEFT_EXTERNAL;
+  root["left-int"]  = VALUE_LEFT_INTERNAL;
 
   root.prettyPrintTo(Serial);
 #endif
-*/
+
 }
 
 
@@ -134,11 +136,7 @@ void receiveEvent(int countToRead) {
   byte x;
   while (0 < Wire.available()) {
     x = Wire.read();
-    //Serial.println(x, HEX);
   }
-  //String message = "Receive event: ";
-  //String out = message + x;
-
   EVENT = x;
 }
 
@@ -146,6 +144,7 @@ void receiveEvent(int countToRead) {
 void requestEvent() {
   String event_s = "0xFF";
   switch (EVENT) {
+    
     case EVENT_GET_RIGHT_EXTERNAL:
       Wire.write(VALUE_RIGHT_EXTERNAL);
       break;
@@ -158,6 +157,7 @@ void requestEvent() {
     case EVENT_GET_LEFT_INTERNAL:
       Wire.write(VALUE_LEFT_INTERNAL);
       break;
+      
     default:
       Wire.write(0xFF);
       //event_s = String(0xFF,HEX);
