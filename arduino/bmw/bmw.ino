@@ -2,6 +2,11 @@
 #include <Wire.h>
 
 #define SERIAL_OUTPUT              1
+#define SERIAL_DEBUG               1
+
+#ifdef SERIAL_OUTPUT
+  #include <ArduinoJson.h>
+#endif
 
 #define MAX_DIST                   300
 #define MAX_VALUE                  13283
@@ -27,16 +32,16 @@
 #define PULSES_NUMBER              32
 
 // Output variables
-OUT_TYPE VALUE_RIGHT_EXTERNAL = 0;
-OUT_TYPE VALUE_RIGHT_INTERNAL = 0;
-OUT_TYPE VALUE_LEFT_EXTERNAL  = 0;
-OUT_TYPE VALUE_LEFT_INTERNAL  = 0;
+OUT_TYPE VALUE_RIGHT_EXTERNAL    = 0;
+OUT_TYPE VALUE_RIGHT_INTERNAL    = 0;
+OUT_TYPE VALUE_LEFT_EXTERNAL     = 0;
+OUT_TYPE VALUE_LEFT_INTERNAL     = 0;
 
-uint8_t EVENT = 0;
+uint8_t EVENT                    = 0;
 
-int parkPin    = 7;
-int ledPin = 13;
-unsigned long pulse_length = 0;
+int parkPin                      = 7;
+int ledPin                       = 13;
+unsigned long pulse_length       = 0;
 
 byte sensorValue[PULSES_NUMBER];
 byte pulse_value;
@@ -44,8 +49,6 @@ byte pulse_value;
 int values[4];
 int distance[4];
 
-
-#include <ArduinoJson.h>
 
 void setup() {
   pinMode(parkPin, INPUT);
@@ -62,8 +65,8 @@ void setup() {
   #endif
 }
 
-void loop() {
 
+void loop() {
   // bmw
   while (pulse_length < 2500 || pulse_length > 3500) {
     pulse_length = pulseIn(parkPin, HIGH);
@@ -84,8 +87,26 @@ void loop() {
     bitCount++;
   }
 
+#ifdef SERIAL_DEBUG
+  Serial.print(bitCount);
+  Serial.print( "   " );
+
+  for(int i=0; i<PULSES_NUMBER; i++){
+    if(i%8==0) Serial.print( ' ' );
+    Serial.print( sensorValue[i] );
+  }
+    
+  Serial.print( "\n" );
+#endif
+
 
   int i, j;
+  
+  VALUE_RIGHT_EXTERNAL = 0;
+  VALUE_RIGHT_INTERNAL = 0;
+  VALUE_LEFT_INTERNAL = 0;
+  VALUE_LEFT_EXTERNAL = 0;\
+  
   for(i=0, j=0; i<8, j<8; i++, j++){
     VALUE_RIGHT_EXTERNAL |= sensorValue[i] << j;
     }  
@@ -102,19 +123,25 @@ void loop() {
     VALUE_LEFT_EXTERNAL |= sensorValue[i] << j;
     }  
 
-/*
-  Serial.print(bitCount);
-  Serial.print( "   " );
+#ifdef SERIAL_DEBUG
+  Serial.print(" ");
+  Serial.print(VALUE_RIGHT_EXTERNAL);
+  Serial.print(" ");
+  Serial.print(VALUE_RIGHT_INTERNAL);
+  Serial.print(" ");
+  Serial.print(VALUE_LEFT_INTERNAL);
+  Serial.print(" ");
+  Serial.print(VALUE_LEFT_EXTERNAL);
+  
+  Serial.print(" ");
+#endif
+  
+  VALUE_RIGHT_EXTERNAL = map(VALUE_RIGHT_EXTERNAL, 0, 48, 250, 0 );  
+  VALUE_RIGHT_INTERNAL = map(VALUE_RIGHT_INTERNAL, 0, 48, 250, 0 ); 
+  VALUE_LEFT_INTERNAL  = map(VALUE_LEFT_INTERNAL,  0, 48, 250, 0 ); 
+  VALUE_LEFT_EXTERNAL  = map(VALUE_LEFT_EXTERNAL,  0, 48, 250, 0 ); 
 
-  for(int i=0; i<PULSES_NUMBER; i++){
-    if(i%8==0) Serial.print( ' ' );
-    Serial.print( sensorValue[i] );
-  }
-    
-  Serial.print( "\n" );
-*/
-
-
+  
 #ifdef SERIAL_OUTPUT
   StaticJsonBuffer<200> jsonBuffer;
   JsonObject& root = jsonBuffer.createObject();
