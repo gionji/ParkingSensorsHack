@@ -3,18 +3,18 @@
 
 // #define SERIAL_OUTPUT 1
 
-#define MAX_DIST 300
-#define MAX_VALUE 13283
-#define MIN_DIST 0
-#define MIN_VALUE 16361
- 
+#define MAX_DIST                    300
+#define MAX_VALUE                   13283
+#define MIN_DIST                    0
+#define MIN_VALUE                   16361
+
 
 // Device address
-#define I2C_ADDR             0x70
+#define I2C_ADDR                    0x70
 
 // I2C registers descriptions
-#define EVENT_GET_RIGHT_EXTERNAL      0x41
-#define EVENT_GET_RIGHT_INTERNAL     0x42
+#define EVENT_GET_RIGHT_EXTERNAL    0x41
+#define EVENT_GET_RIGHT_INTERNAL    0x42
 #define EVENT_GET_LEFT_EXTERNAL     0x40
 #define EVENT_GET_LEFT_INTERNAL     0x43
 
@@ -89,29 +89,29 @@ void loop() {
   0 = a
   1 = d
   2 = c
-  3 = b 
+  3 = b
   */
-  
+
   short sensorId = 0;
   sensorId |= sensorValue[9] << 1;
   sensorId |= sensorValue[8] << 0;
-  
+
   int count = 13;
-  
+
   short data = 0;
   count = 0;
   
   for(i=10; i<16; i++){
     data |= sensorValue[i] << count;
     count++;
-    }  
+    }
   for(i=0; i<8; i++){
     data |= sensorValue[i] << count;
     count++;
     }
-  
+
   values[ sensorId ] = data;
-  
+
   for(i = 0; i<4; i++){
     distance[i] = map(values[ i ], MIN_VALUE, MAX_VALUE, MIN_DIST, MAX_DIST);
   }
@@ -124,7 +124,7 @@ void loop() {
 #ifdef SERIAL_OUTPUT
   StaticJsonBuffer<200> jsonBuffer;
   JsonObject& root = jsonBuffer.createObject();
-    
+
   root["right-ext"] = VALUE_RIGHT_EXTERNAL;
   root["right-int"] = VALUE_RIGHT_INTERNAL;
   root["left-ext"] = VALUE_LEFT_EXTERNAL;
@@ -146,23 +146,23 @@ void receiveEvent(int countToRead) {
   }
   //String message = "Receive event: ";
   //String out = message + x;
-  
+
   EVENT = x;
 }
 
 void requestEvent() {
   String event_s = "0xFF";
   switch (EVENT) {
-    case EVENT_GET_RIGHT_EXTERNAL: 
+    case EVENT_GET_RIGHT_EXTERNAL:
       Wire.write(VALUE_RIGHT_EXTERNAL);
       break;
-    case EVENT_GET_RIGHT_INTERNAL: 
+    case EVENT_GET_RIGHT_INTERNAL:
       Wire.write(VALUE_RIGHT_INTERNAL);
       break;
-    case EVENT_GET_LEFT_EXTERNAL: 
+    case EVENT_GET_LEFT_EXTERNAL:
       Wire.write(VALUE_LEFT_EXTERNAL);
       break;
-    case EVENT_GET_LEFT_INTERNAL: 
+    case EVENT_GET_LEFT_INTERNAL:
       Wire.write(VALUE_LEFT_INTERNAL);
       break;
     default:

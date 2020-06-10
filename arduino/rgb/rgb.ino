@@ -1,30 +1,26 @@
-int redPin = 9;
-int greenPin = 10;
-int bluePin = 11;
+#define RGB_RED_PIN        9
+#define RGB_GREEN_PIN      10
+#define RGB_BLUE_PIN       11
 
- 
-//uncomment this line if using a Common Anode LED
+// uncomment this line if using a Common Anode LED
 //#define COMMON_ANODE
 
 
 void setup() {
   // put your setup code here, to run once:
-  pinMode(15, INPUT);
-  pinMode(16, INPUT);
-  pinMode(17, INPUT);
+  pinMode(15, INPUT); // Set A1 as digital input
+  pinMode(16, INPUT); // set A2 as input
+  pinMode(17, INPUT); // set a3 as input
 
-  pinMode(redPin, OUTPUT); // Red
-  pinMode(greenPin, OUTPUT); // Green 
-  pinMode(bluePin, OUTPUT); // BLue
-  pinMode(12, OUTPUT);
+  pinMode(RGB_RED_PIN,   OUTPUT); // Red
+  pinMode(RGB_GREEN_PIN, OUTPUT); // Green
+  pinMode(RGB_BLUE_PIN,  OUTPUT); // BLue
 
-  digitalWrite(12, HIGH);
 }
 
 
- 
-void loop()
-{
+
+void loop() {
   setColor(255, 0, 0);  // red
   delay(1000);
   setColor(0, 255, 0);  // green
@@ -32,22 +28,22 @@ void loop()
   setColor(0, 0, 255);  // blue
   delay(1000);
   setColor(255, 255, 0);  // yellow
-  delay(1000);  
+  delay(1000);
   setColor(80, 0, 80);  // purple
   delay(1000);
   setColor(0, 255, 255);  // aqua
   delay(1000);
 }
- 
-void setColor(int red, int green, int blue)
-{
+
+
+
+void setColor(int red, int green, int blue) {
   #ifdef COMMON_ANODE
     red = 255 - red;
     green = 255 - green;
     blue = 255 - blue;
   #endif
-  analogWrite(redPin, red);
-  analogWrite(greenPin, green);
-  analogWrite(bluePin, blue);  
+  analogWrite(RGB_RED_PIN, red);
+  analogWrite(RGB_GREEN_PIN, green);
+  analogWrite(RGB_BLUE_PIN, blue);
 }
-
